@@ -21,7 +21,7 @@ namespace CredentialBinder
 
     internal sealed class CredentialBinderForm : Form
     {
-        private readonly TextBox addressTextBox = new TextBox();
+        private readonly ComboBox shareLocationComboBox = new ComboBox();
         private readonly TextBox userNameTextBox = new TextBox();
         private readonly TextBox passwordTextBox = new TextBox();
         private readonly Button bindButton = new Button();
@@ -40,9 +40,8 @@ namespace CredentialBinder
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
-            ShowInTaskbar = true;
             StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(460, 292);
+            ClientSize = new Size(460, 382);
             BackColor = Color.White;
 
             var title = new Label
@@ -51,22 +50,27 @@ namespace CredentialBinder
                 Font = new Font("Microsoft YaHei UI", 15F, FontStyle.Bold),
                 ForeColor = Color.FromArgb(31, 71, 120),
                 Location = new Point(28, 23),
-                Text = "\u7ed1\u5b9a\u5171\u4eab\u76d8\u51ed\u636e"
+                Text = "\u516c\u53f8\u5171\u4eab\u76d8\u51ed\u636e\u7ed1\u5b9a"
             };
             var hint = new Label
             {
                 AutoSize = true,
                 ForeColor = Color.FromArgb(90, 90, 90),
                 Location = new Point(30, 58),
-                Text = "\u51ed\u636e\u4f1a\u4fdd\u5b58\u5230 Windows \u51ed\u636e\u7ba1\u7406\u5668\u5e76\u5237\u65b0\u5171\u4eab\u8fde\u63a5\u3002"
+                Text = "\u9009\u62e9\u5171\u4eab\u76d8\u540e\u8f93\u5165\u60a8\u7684\u8d26\u53f7\u548c\u5bc6\u7801\u3002"
             };
 
-            ConfigureField(addressTextBox, 116);
+            ConfigureField(shareLocationComboBox, 116);
+            shareLocationComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            shareLocationComboBox.Items.Add(new ShareLocation("\u6df1\u5733\u5171\u4eab\u76d8", "192.168.10.200"));
+            shareLocationComboBox.Items.Add(new ShareLocation("\u5e7f\u897f\u5171\u4eab\u76d8", "172.16.1.166"));
+            shareLocationComboBox.SelectedIndex = 0;
+
             ConfigureField(userNameTextBox, 156);
             ConfigureField(passwordTextBox, 196);
             passwordTextBox.UseSystemPasswordChar = true;
 
-            AddFieldLabel("\u5171\u4eab\u5730\u5740", 119);
+            AddFieldLabel("\u5171\u4eab\u76d8", 119);
             AddFieldLabel("\u8d26\u53f7", 159);
             AddFieldLabel("\u5bc6\u7801", 199);
 
@@ -90,16 +94,67 @@ namespace CredentialBinder
 
             statusLabel.AutoEllipsis = true;
             statusLabel.ForeColor = Color.FromArgb(74, 74, 74);
-            statusLabel.Location = new Point(166, 251);
-            statusLabel.Size = new Size(272, 24);
+            statusLabel.Location = new Point(28, 351);
+            statusLabel.Size = new Size(410, 24);
             statusLabel.TextAlign = ContentAlignment.MiddleLeft;
+
+            var shortcutTitle = new Label
+            {
+                AutoSize = true,
+                ForeColor = Color.FromArgb(74, 74, 74),
+                Location = new Point(28, 296),
+                Text = "\u684c\u9762\u5feb\u6377\u65b9\u5f0f"
+            };
+
+            Button shenzhenShareButton = CreateShortcutButton(
+                "\u6df1\u5733\u5171\u4eab\u76d8\u5feb\u6377\u65b9\u5f0f",
+                28,
+                "\u6df1\u5733\u5171\u4eab\u76d8",
+                "\\\\192.168.10.200\\\u5c91\u79d1\u79d1\u6280\\\u6df1\u5733\u5404\u90e8\u95e8\u6587\u4ef6\u5171\u4eab");
+            Button guangxiShareButton = CreateShortcutButton(
+                "\u5e7f\u897f\u5171\u4eab\u76d8\u5feb\u6377\u65b9\u5f0f",
+                166,
+                "\u5e7f\u897f\u5171\u4eab\u76d8",
+                "\\\\172.16.1.166");
+            Button shenzhenScanButton = CreateShortcutButton(
+                "\u6df1\u5733\u626b\u63cf\u5feb\u6377\u65b9\u5f0f",
+                304,
+                "\u6df1\u5733\u626b\u63cf",
+                "\\\\192.168.10.200\\\u5c91\u79d1\u79d1\u6280\\\u6df1\u5733\u5404\u90e8\u95e8\u6587\u4ef6\u5171\u4eab\\\u626b\u63cf");
 
             AcceptButton = bindButton;
             Controls.AddRange(new Control[]
             {
-                title, hint, addressTextBox, userNameTextBox, passwordTextBox,
-                showPassword, bindButton, statusLabel
+                title, hint, shareLocationComboBox, userNameTextBox, passwordTextBox,
+                showPassword, bindButton, shortcutTitle, shenzhenShareButton,
+                guangxiShareButton, shenzhenScanButton, statusLabel
             });
+        }
+
+        private Button CreateShortcutButton(string text, int left, string shortcutName, string targetPath)
+        {
+            var button = new Button
+            {
+                FlatStyle = FlatStyle.System,
+                Location = new Point(left, 315),
+                Size = new Size(124, 28),
+                Text = text,
+                UseVisualStyleBackColor = true
+            };
+            button.Click += delegate
+            {
+                try
+                {
+                    DesktopShortcut.Create(shortcutName, targetPath);
+                    statusLabel.ForeColor = Color.FromArgb(31, 112, 66);
+                    statusLabel.Text = shortcutName + "\u5feb\u6377\u65b9\u5f0f\u5df2\u521b\u5efa\u3002";
+                }
+                catch (Exception exception)
+                {
+                    ShowError("\u521b\u5efa\u5feb\u6377\u65b9\u5f0f\u5931\u8d25\uff1a" + exception.Message);
+                }
+            };
+            return button;
         }
 
         private void AddFieldLabel(string text, int top)
@@ -112,23 +167,19 @@ namespace CredentialBinder
             });
         }
 
-        private static void ConfigureField(TextBox textBox, int top)
+        private static void ConfigureField(Control control, int top)
         {
-            textBox.Location = new Point(116, top - 3);
-            textBox.Size = new Size(322, 25);
-            textBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            control.Location = new Point(116, top - 3);
+            control.Size = new Size(322, 25);
+            control.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         }
 
         private void BindButton_Click(object sender, EventArgs e)
         {
-            string server;
-            try
+            var selectedLocation = shareLocationComboBox.SelectedItem as ShareLocation;
+            if (selectedLocation == null)
             {
-                server = NetworkAddress.GetServerName(addressTextBox.Text);
-            }
-            catch (ArgumentException exception)
-            {
-                ShowError(exception.Message);
+                ShowError("\u8bf7\u9009\u62e9\u5171\u4eab\u76d8\u3002");
                 return;
             }
 
@@ -150,16 +201,18 @@ namespace CredentialBinder
             try
             {
                 bindButton.Enabled = false;
-                WindowsCredentialStore.SaveNetworkCredential(server, userNameTextBox.Text.Trim(), passwordTextBox.Text);
+                WindowsCredentialStore.SaveNetworkCredential(
+                    selectedLocation.Server,
+                    userNameTextBox.Text.Trim(),
+                    passwordTextBox.Text);
                 credentialSaved = true;
                 passwordTextBox.Clear();
-                // 清除现有 SMB 会话，确保下一次访问使用刚写入的新凭据。
                 statusLabel.ForeColor = Color.FromArgb(74, 74, 74);
                 statusLabel.Text = "\u6b63\u5728\u91cd\u542f Workstation \u670d\u52a1...";
                 Application.DoEvents();
                 WorkstationService.RestartAndWait();
                 statusLabel.ForeColor = Color.FromArgb(31, 112, 66);
-                statusLabel.Text = "\u5df2\u7ed1\u5b9a\u5230 " + server + "\uff0c\u5171\u4eab\u8fde\u63a5\u5df2\u5237\u65b0\u3002";
+                statusLabel.Text = selectedLocation.Name + "\u51ed\u636e\u5df2\u7ed1\u5b9a\uff0c\u5171\u4eab\u8fde\u63a5\u5df2\u5237\u65b0\u3002";
             }
             catch (Win32Exception exception)
             {
@@ -179,6 +232,77 @@ namespace CredentialBinder
         {
             statusLabel.ForeColor = Color.FromArgb(180, 38, 38);
             statusLabel.Text = message;
+        }
+    }
+
+    internal sealed class ShareLocation
+    {
+        internal ShareLocation(string name, string server)
+        {
+            Name = name;
+            Server = server;
+        }
+
+        internal string Name { get; private set; }
+
+        internal string Server { get; private set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
+
+    internal static class DesktopShortcut
+    {
+        internal static void Create(string shortcutName, string targetPath)
+        {
+            string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            string shortcutPath = System.IO.Path.Combine(desktopPath, shortcutName + ".lnk");
+            Type shellType = Type.GetTypeFromProgID("WScript.Shell");
+            if (shellType == null)
+            {
+                throw new InvalidOperationException("Windows \u5feb\u6377\u65b9\u5f0f\u7ec4\u4ef6\u4e0d\u53ef\u7528\u3002");
+            }
+
+            object shell = null;
+            object shortcut = null;
+            try
+            {
+                shell = Activator.CreateInstance(shellType);
+                shortcut = shellType.InvokeMember(
+                    "CreateShortcut",
+                    System.Reflection.BindingFlags.InvokeMethod,
+                    null,
+                    shell,
+                    new object[] { shortcutPath });
+                Type shortcutType = shortcut.GetType();
+                shortcutType.InvokeMember(
+                    "TargetPath",
+                    System.Reflection.BindingFlags.SetProperty,
+                    null,
+                    shortcut,
+                    new object[] { targetPath });
+                shortcutType.InvokeMember(
+                    "Save",
+                    System.Reflection.BindingFlags.InvokeMethod,
+                    null,
+                    shortcut,
+                    null);
+            }
+            finally
+            {
+                ReleaseComObject(shortcut);
+                ReleaseComObject(shell);
+            }
+        }
+
+        private static void ReleaseComObject(object value)
+        {
+            if (value != null && Marshal.IsComObject(value))
+            {
+                Marshal.FinalReleaseComObject(value);
+            }
         }
     }
 
@@ -216,184 +340,6 @@ namespace CredentialBinder
         }
     }
 
-    #if false
-    internal sealed class CredentialVerificationException : Exception
-    {
-        internal CredentialVerificationException(string message) : base(message)
-        {
-        }
-    }
-
-    internal static class NetworkShareVerifier
-    {
-        private const uint ResourceConnected = 1;
-        private const uint ResourceTypeDisk = 1;
-        private const uint ConnectTemporary = 4;
-        private const int ErrorSessionCredentialConflict = 1219;
-        private const int ErrorMoreData = 234;
-        private const int ErrorNoMoreItems = 259;
-
-        [DllImport("mpr.dll", CharSet = CharSet.Unicode)]
-        private static extern int WNetAddConnection2(
-            [In] ref NetResource netResource,
-            string password,
-            string userName,
-            uint flags);
-
-        [DllImport("mpr.dll", CharSet = CharSet.Unicode)]
-        private static extern int WNetOpenEnum(
-            uint scope,
-            uint type,
-            uint usage,
-            IntPtr netResource,
-            out IntPtr enumHandle);
-
-        [DllImport("mpr.dll", CharSet = CharSet.Unicode)]
-        private static extern int WNetEnumResource(
-            IntPtr enumHandle,
-            ref uint count,
-            IntPtr buffer,
-            ref uint bufferSize);
-
-        [DllImport("mpr.dll")]
-        private static extern int WNetCloseEnum(IntPtr enumHandle);
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        private struct NetResource
-        {
-            public uint Scope;
-            public uint Type;
-            public uint DisplayType;
-            public uint Usage;
-            public string LocalName;
-            public string RemoteName;
-            public string Comment;
-            public string Provider;
-        }
-
-        internal static void VerifyShareAccess(string sharePath, string userName, string password)
-        {
-            var resource = new NetResource
-            {
-                Type = ResourceTypeDisk,
-                RemoteName = sharePath
-            };
-            int result = WNetAddConnection2(ref resource, password, userName, ConnectTemporary);
-            if (result == ErrorSessionCredentialConflict)
-            {
-                throw new CredentialVerificationException("\u670d\u52a1\u5668\u5df2\u5b58\u5728\u4f7f\u7528\u5176\u4ed6\u8d26\u53f7\u7684 SMB \u8fde\u63a5\uff0c\u8bf7\u52fe\u9009\u201c\u91cd\u542f Workstation \u540e\u9a8c\u8bc1\u201d\u540e\u91cd\u8bd5\u3002");
-            }
-
-            if (result != 0)
-            {
-                throw new Win32Exception(result);
-            }
-        }
-
-        internal static bool HasExistingConnectionToServer(string server)
-        {
-            IntPtr enumHandle;
-            int openResult = WNetOpenEnum(ResourceConnected, ResourceTypeDisk, 0, IntPtr.Zero, out enumHandle);
-            if (openResult != 0)
-            {
-                throw new Win32Exception(openResult);
-            }
-
-            try
-            {
-                uint bufferSize = 16384;
-                while (true)
-                {
-                    IntPtr buffer = Marshal.AllocHGlobal((int)bufferSize);
-                    try
-                    {
-                        uint count = UInt32.MaxValue;
-                        int result = WNetEnumResource(enumHandle, ref count, buffer, ref bufferSize);
-                        if (result == ErrorNoMoreItems)
-                        {
-                            return false;
-                        }
-
-                        if (result == ErrorMoreData)
-                        {
-                            continue;
-                        }
-
-                        if (result != 0)
-                        {
-                            throw new Win32Exception(result);
-                        }
-
-                        int itemSize = Marshal.SizeOf(typeof(NetResource));
-                        for (int index = 0; index < count; index++)
-                        {
-                            IntPtr itemPointer = IntPtr.Add(buffer, index * itemSize);
-                            var resource = (NetResource)Marshal.PtrToStructure(itemPointer, typeof(NetResource));
-                            if (IsConnectionToServer(resource.RemoteName, server))
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        Marshal.FreeHGlobal(buffer);
-                    }
-                }
-            }
-            finally
-            {
-                WNetCloseEnum(enumHandle);
-            }
-        }
-
-        private static bool IsConnectionToServer(string remoteName, string server)
-        {
-            if (string.IsNullOrEmpty(remoteName))
-            {
-                return false;
-            }
-
-            string value = remoteName.TrimStart('\\', '/');
-            int separator = value.IndexOfAny(new[] { '\\', '/' });
-            string remoteServer = separator < 0 ? value : value.Substring(0, separator);
-            return string.Equals(remoteServer, server, StringComparison.OrdinalIgnoreCase);
-        }
-    }
-
-    #endif
-
-    internal static class NetworkAddress
-    {
-        internal static string GetServerName(string address)
-        {
-            string value = Normalize(address);
-            int separator = value.IndexOfAny(new[] { '\\', '/' });
-            string server = separator < 0 ? value : value.Substring(0, separator);
-            ValidateServer(server);
-            return server;
-        }
-
-        private static string Normalize(string address)
-        {
-            string value = (address ?? string.Empty).Trim();
-            if (value.StartsWith("smb://", StringComparison.OrdinalIgnoreCase))
-            {
-                value = value.Substring(6);
-            }
-
-            return value.TrimStart('\\', '/');
-        }
-
-        private static void ValidateServer(string server)
-        {
-            if (server.Length == 0 || server.IndexOfAny(new[] { ':', '*', '?', '\"', '<', '>', '|' }) >= 0)
-            {
-                throw new ArgumentException("\u8bf7\u8f93\u5165\u6709\u6548\u7684\u670d\u52a1\u5668\u5730\u5740\u3002");
-            }
-        }
-    }
-
     internal static class WindowsCredentialStore
     {
         private const uint CredTypeDomainPassword = 2;
@@ -421,7 +367,6 @@ namespace CredentialBinder
 
         internal static void SaveNetworkCredential(string server, string userName, string password)
         {
-            // 密码仅在调用 Windows 凭据 API 所需的非托管缓冲区中短暂存在。
             byte[] passwordBytes = Encoding.Unicode.GetBytes(password);
             IntPtr passwordPointer = Marshal.AllocCoTaskMem(passwordBytes.Length);
 
