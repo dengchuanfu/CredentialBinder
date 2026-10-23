@@ -41,7 +41,7 @@ namespace CredentialBinder
             MaximizeBox = false;
             MinimizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(460, 382);
+            ClientSize = new Size(460, 416);
             BackColor = Color.White;
 
             var title = new Label
@@ -94,7 +94,7 @@ namespace CredentialBinder
 
             statusLabel.AutoEllipsis = true;
             statusLabel.ForeColor = Color.FromArgb(74, 74, 74);
-            statusLabel.Location = new Point(28, 351);
+            statusLabel.Location = new Point(28, 385);
             statusLabel.Size = new Size(410, 24);
             statusLabel.TextAlign = ContentAlignment.MiddleLeft;
 
@@ -109,34 +109,57 @@ namespace CredentialBinder
             Button shenzhenShareButton = CreateShortcutButton(
                 "\u6df1\u5733\u5171\u4eab\u76d8\u5feb\u6377\u65b9\u5f0f",
                 28,
+                315,
                 "\u6df1\u5733\u5171\u4eab\u76d8",
                 "\\\\192.168.10.200\\\u5c91\u79d1\u79d1\u6280\\\u6df1\u5733\u5404\u90e8\u95e8\u6587\u4ef6\u5171\u4eab");
             Button guangxiShareButton = CreateShortcutButton(
                 "\u5e7f\u897f\u5171\u4eab\u76d8\u5feb\u6377\u65b9\u5f0f",
                 166,
+                315,
                 "\u5e7f\u897f\u5171\u4eab\u76d8",
                 "\\\\172.16.1.166");
             Button shenzhenScanButton = CreateShortcutButton(
                 "\u6df1\u5733\u626b\u63cf\u5feb\u6377\u65b9\u5f0f",
                 304,
+                315,
                 "\u6df1\u5733\u626b\u63cf",
                 "\\\\192.168.10.200\\\u5c91\u79d1\u79d1\u6280\\\u6df1\u5733\u5404\u90e8\u95e8\u6587\u4ef6\u5171\u4eab\\\u626b\u63cf");
+
+            Button ipoDataButton = CreateShortcutButton(
+                "IPO\u8d44\u6599",
+                28,
+                349,
+                "IPO\u8d44\u6599",
+                "\\\\192.168.10.200\\ipo\u8d44\u6599");
+            Button guangxiIpoFinanceButton = CreateShortcutButton(
+                "\u5e7f\u897fIPO\u8d22\u52a1",
+                166,
+                349,
+                "\u5e7f\u897fIPO\u8d22\u52a1",
+                "\\\\192.168.10.200\\\u5e7f\u897fipo\u8d22\u52a1");
+            Button guangxiIpoNonFinanceButton = CreateShortcutButton(
+                "\u5e7f\u897fIPO\u975e\u8d22\u52a1",
+                304,
+                349,
+                "\u5e7f\u897fIPO\u975e\u8d22\u52a1",
+                "\\\\192.168.10.200\\\u5e7f\u897fipo\u975e\u8d22\u52a1");
 
             AcceptButton = bindButton;
             Controls.AddRange(new Control[]
             {
                 title, hint, shareLocationComboBox, userNameTextBox, passwordTextBox,
                 showPassword, bindButton, shortcutTitle, shenzhenShareButton,
-                guangxiShareButton, shenzhenScanButton, statusLabel
+                guangxiShareButton, shenzhenScanButton, ipoDataButton,
+                guangxiIpoFinanceButton, guangxiIpoNonFinanceButton, statusLabel
             });
         }
 
-        private Button CreateShortcutButton(string text, int left, string shortcutName, string targetPath)
+        private Button CreateShortcutButton(string text, int left, int top, string shortcutName, string targetPath)
         {
             var button = new Button
             {
                 FlatStyle = FlatStyle.System,
-                Location = new Point(left, 315),
+                Location = new Point(left, top),
                 Size = new Size(124, 28),
                 Text = text,
                 UseVisualStyleBackColor = true
